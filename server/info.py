@@ -4,40 +4,66 @@
 # Website     : www.gewbot.com
 # Author      : William
 # Date        : 2019/08/28
+import os
 import psutil
+import json
+import logging
+import time
+from dataclasses import asdict, dataclass
+from typing import Dict, Any
 
-def get_cpu_tempfunc():
-    """ Return CPU temperature """
-    result = 0
-    mypath = "/sys/class/thermal/thermal_zone0/temp"
-    with open(mypath, 'r') as mytmpfile:
-        for line in mytmpfile:
-            result = line
+logger = logging.getLogger(__name__)
 
-    result = float(result)/1000
-    result = round(result, 1)
-    return str(result)
+@dataclass
+class SystemStatus:
+    cpu_temp: float = 0.0
+    cpu_usage: float = 0.0
+    ram_usage: float = 0.0
+    stability: float = 0.0
+    uptime: float = 0.0
 
+class SystemMonitor:
+    def __init__(self):
+        self.start_time = time.time()
 
-def get_gpu_tempfunc():
-    """ Return GPU temperature as a character string"""
-    res = os.popen('/opt/vc/bin/vcgencmd measure_temp').readline()
-    return res.replace("temp=", "")
+    def get_cpu_temp(self) -> float:
+        """Get CPU temperature"""
+        try:
+            if os.path.exists('/sys/class/thermal/thermal_zone0/temp'):
+                with open('/sys/class/thermal/thermal_zone0/temp') as f:
+                    temp = float(f.read()) / 1000.0
+                return round(temp, 1)
+        except Exception as e:
+            logger.warning(f"Failed to read CPU temperature: {e}")
+        return 0.0
 
+    def get_cpu_usage(self) -> float:
+        """Get CPU usage percentage"""
+        return psutil.cpu_percent()
 
-def get_cpu_use():
-    """ Return CPU usage using psutil"""
-    cpu_cent = psutil.cpu_percent()
-    return str(cpu_cent)
+    def get_ram_usage(self) -> float:
+        """Get RAM usage percentage"""
+        return psutil.virtual_memory().percent
 
+    def get_uptime(self) -> float:
+        """Get system uptime in seconds"""
+        return time.time() - self.start_time
 
-def get_ram_info():
-    """ Return RAM usage using psutil """
-    ram_cent = psutil.virtual_memory()[2]
-    return str(ram_cent)
+    def get_status(self) -> SystemStatus:
+        """Get complete system status"""
+        from move import calc_stability_metric
+        
+        return SystemStatus(
+            cpu_temp=self.get_cpu_temp(),
+            cpu_usage=self.get_cpu_usage(),
+            ram_usage=self.get_ram_usage(),
+            stability=calc_stability_metric(),
+            uptime=self.get_uptime()
+        )
 
+    def to_json(self) -> str:
+        """Get system status as JSON string"""
+        return json.dumps(asdict(self.get_status()))
 
-def get_swap_info():
-    """ Return swap memory  usage using psutil """
-    swap_cent = psutil.swap_memory()[3]
-    return str(swap_cent)
+# Global monitor instance
+monitor = SystemMonitor()
