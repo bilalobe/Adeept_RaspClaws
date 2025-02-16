@@ -1,0 +1,89 @@
+/* Main styles for RaspClaws interface */
+body {
+    font-family: Arial, sans-serif;
+    margin: 20px;
+    background-color: #f5f5f5;
+}
+
+.control-group {
+    background: white;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.control-row {
+    display: flex;
+    align-items: center;
+    margin: 10px 0;
+}
+
+.slider {
+    flex-grow: 1;
+    margin: 0 15px;
+}
+
+.control-button {
+    background: #4CAF50;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.control-button:hover {
+    background: #45a049;
+}
+
+.light-control {
+    margin: 15px 0;
+}
+
+.button-group {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.pattern-button {
+    background: #2196F3;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.pattern-button:hover {
+    background: #1976D2;
+}
+
+.status-panel {
+    background: white;
+    border-radius: 8px;
+    padding: 20px;
+    margin-top: 20px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+#notification {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    padding: 10px 20px;
+    border-radius: 4px;
+    display: none;
+}
+
+.success {
+    background: #4CAF50;
+    color: white;
+}
+
+.error {
+    background: #F44336;
+    color: white;
+}
