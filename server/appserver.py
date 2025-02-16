@@ -5,16 +5,18 @@
 # Author      : William
 # Date        : 2019/11/21
 
+import os
 import socket
 import threading
 import time
-import os
+
 from rpi_ws281x import *
+
 import LED
 import move
 
 LED = LED.LED()
-LED.colorWipe(Color(0,64,255))
+LED.colorWipe(Color(0, 64, 255))
 
 step_set = 1
 speed_set = 100
@@ -28,6 +30,7 @@ servo_command = 'no'
 SmoothMode = 0
 steadyMode = 0
 
+
 def move_thread():
     global step_set
     stand_stu = 1
@@ -35,7 +38,7 @@ def move_thread():
         if not steadyMode:
             if direction_command == 'forward' and turn_command == 'no':
                 if SmoothMode:
-                    move.dove(step_set,35,0.001,DPI,'no')
+                    move.dove(step_set, 35, 0.001, DPI, 'no')
                     step_set += 1
                     if step_set == 5:
                         step_set = 1
@@ -49,7 +52,7 @@ def move_thread():
                     continue
             elif direction_command == 'backward' and turn_command == 'no':
                 if SmoothMode:
-                    move.dove(step_set,-35,0.001,DPI,'no')
+                    move.dove(step_set, -35, 0.001, DPI, 'no')
                     step_set += 1
                     if step_set == 5:
                         step_set = 1
@@ -66,7 +69,7 @@ def move_thread():
 
             if turn_command != 'no':
                 if SmoothMode:
-                    move.dove(step_set,35,0.001,DPI,turn_command)
+                    move.dove(step_set, 35, 0.001, DPI, turn_command)
                     step_set += 1
                     if step_set == 5:
                         step_set = 1
@@ -134,11 +137,11 @@ def app_ctrl():
     servo_move.start()
     servo_move.pause()
 
-    moving_threading=threading.Thread(target=move_thread)    #Define a thread for moving
-    moving_threading.setDaemon(True)                         #'True' means it is a front thread,it would close when the mainloop() closes
-    moving_threading.start()                                 #Thread starts
+    moving_threading = threading.Thread(target=move_thread)  # Define a thread for moving
+    moving_threading.setDaemon(True)  # 'True' means it is a front thread,it would close when the mainloop() closes
+    moving_threading.start()  # Thread starts
 
-    def  ap_thread():
+    def ap_thread():
         os.system("sudo create_ap wlan0 eth0 Groovy 12345678")
 
     # def setup():
@@ -174,7 +177,7 @@ def app_ctrl():
             servo_command = 'lookleft'
             servo_move.resume()
 
-        elif data_input == 'lookRightStart\n': 
+        elif data_input == 'lookRightStart\n':
             servo_command = 'lookright'
             servo_move.resume()
 
@@ -199,7 +202,6 @@ def app_ctrl():
             servo_move.pause()
             servo_command = 'no'
 
-
         if data_input == 'aStart\n':
             if SmoothMode:
                 SmoothMode = 0
@@ -213,10 +215,10 @@ def app_ctrl():
                 steadyMode = 1
 
         elif data_input == 'cStart\n':
-            LED.colorWipe(Color(255,64,0))
+            LED.colorWipe(Color(255, 64, 0))
 
         elif data_input == 'dStart\n':
-            LED.colorWipe(Color(64,255,0))
+            LED.colorWipe(Color(64, 255, 0))
 
         elif 'aStop' in data_input:
             pass
@@ -232,38 +234,38 @@ def app_ctrl():
     def appconnect():
         global AppCliSock, AppAddr
         try:
-            s =socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
-            s.connect(("1.1.1.1",80))
-            ipaddr_check=s.getsockname()[0]
+            s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            s.connect(("1.1.1.1", 80))
+            ipaddr_check = s.getsockname()[0]
             s.close()
             print(ipaddr_check)
 
             AppSerSock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            AppSerSock.setsockopt(socket.SOL_SOCKET,socket.SO_REUSEADDR,1)
+            AppSerSock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             AppSerSock.bind(app_ADDR)
             AppSerSock.listen(5)
             print('waiting for App connection...')
             AppCliSock, AppAddr = AppSerSock.accept()
             print('...App connected from :', AppAddr)
         except:
-            ap_threading=threading.Thread(target=ap_thread)       #Define a thread for AP Mode
-            ap_threading.setDaemon(True)                          #'True' means it is a front thread,it would close when the mainloop() closes
-            ap_threading.start()                                  #Thread starts
+            ap_threading = threading.Thread(target=ap_thread)  # Define a thread for AP Mode
+            ap_threading.setDaemon(True)  # 'True' means it is a front thread,it would close when the mainloop() closes
+            ap_threading.start()  # Thread starts
 
-            LED.colorWipe(Color(0,16,50))
+            LED.colorWipe(Color(0, 16, 50))
             time.sleep(1)
-            LED.colorWipe(Color(0,16,100))
+            LED.colorWipe(Color(0, 16, 100))
             time.sleep(1)
-            LED.colorWipe(Color(0,16,150))
+            LED.colorWipe(Color(0, 16, 150))
             time.sleep(1)
-            LED.colorWipe(Color(0,16,200))
+            LED.colorWipe(Color(0, 16, 200))
             time.sleep(1)
-            LED.colorWipe(Color(0,16,255))
+            LED.colorWipe(Color(0, 16, 255))
             time.sleep(1)
-            LED.colorWipe(Color(35,255,35))
+            LED.colorWipe(Color(35, 255, 35))
 
             AppSerSock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            AppSerSock.setsockopt(socket.SOL_SOCKET,socket.SO_REUSEADDR,1)
+            AppSerSock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             AppSerSock.bind(app_ADDR)
             AppSerSock.listen(5)
             print('waiting for App connection...')
@@ -272,9 +274,9 @@ def app_ctrl():
 
     appconnect()
     # setup()
-    app_threading=threading.Thread(target=appconnect)         #Define a thread for app connection
-    app_threading.setDaemon(True)                             #'True' means it is a front thread,it would close when the mainloop() closes
-    app_threading.start()                                     #Thread starts
+    app_threading = threading.Thread(target=appconnect)  # Define a thread for app connection
+    app_threading.setDaemon(True)  # 'True' means it is a front thread,it would close when the mainloop() closes
+    app_threading.start()  # Thread starts
 
     while 1:
         data = ''
@@ -283,6 +285,7 @@ def app_ctrl():
             continue
         appCommand(data)
         pass
+
 
 if __name__ == '__main__':
     app_ctrl()
