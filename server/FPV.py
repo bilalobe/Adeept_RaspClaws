@@ -57,7 +57,7 @@ class runThreading(threading.Thread):  # 2
         self.command = command
 
     def run(self):
-        print("开始线程：" + self.name)
+        print("Starting thread:" + self.name)
         step = 1
         while 1:
             # print(self.moving,":",self.speed, ":", self.command)
@@ -68,7 +68,7 @@ class runThreading(threading.Thread):  # 2
                     step = 1
                 time.sleep(0.08)
 
-        print("退出线程：" + self.name)
+        print("Exiting thread:" + self.name)
 
 
 # 2
