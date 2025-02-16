@@ -1,22 +1,23 @@
 #!/usr/bin/env/python
 # File name   : server.py
-# Description : main programe for RaspClaws
+# Description : main program for RaspClaws
 # Website     : www.adeept.com
 # E-mail      : support@adeept.com
 # Author      : William
 # Date        : 2018/08/22
 
-import socket
-import time
-import threading
-import move
-import Adafruit_PCA9685
-from rpi_ws281x import *
-import argparse
 import os
+import socket
+import threading
+import time
+
+import Adafruit_PCA9685
 import psutil
-import switch
+from rpi_ws281x import *
+
 import LED
+import move
+import switch
 
 step_set = 1
 speed_set = 100
@@ -32,11 +33,12 @@ LED = LED.LED()
 SmoothMode = 0
 steadyMode = 0
 
+
 def breath_led():
-    LED.breath(255)
+    LED.breath_color_set('blue')
 
 
-def  ap_thread():
+def ap_thread():
     os.system("sudo create_ap wlan0 eth0 AdeeptCar 12345678")
 
 
@@ -48,7 +50,7 @@ def get_cpu_tempfunc():
         for line in mytmpfile:
             result = line
 
-    result = float(result)/1000
+    result = float(result) / 1000
     result = round(result, 1)
     return str(result)
 
@@ -78,7 +80,7 @@ def get_swap_info():
 
 
 def info_get():
-    global cpu_t,cpu_u,gpu_t,ram_info
+    global cpu_t, cpu_u, gpu_t, ram_info
     while 1:
         cpu_t = get_cpu_tempfunc()
         cpu_u = get_cpu_use()
@@ -93,7 +95,7 @@ def move_thread():
         if not steadyMode:
             if direction_command == 'forward' and turn_command == 'no':
                 if SmoothMode:
-                    move.dove(step_set,35,0.001,DPI,'no')
+                    move.dove(step_set, 35, 0.001, DPI, 'no')
                     step_set += 1
                     if step_set == 5:
                         step_set = 1
@@ -107,7 +109,7 @@ def move_thread():
                     continue
             elif direction_command == 'backward' and turn_command == 'no':
                 if SmoothMode:
-                    move.dove(step_set,-35,0.001,DPI,'no')
+                    move.dove(step_set, -35, 0.001, DPI, 'no')
                     step_set += 1
                     if step_set == 5:
                         step_set = 1
@@ -124,7 +126,7 @@ def move_thread():
 
             if turn_command != 'no':
                 if SmoothMode:
-                    move.dove(step_set,35,0.001,DPI,turn_command)
+                    move.dove(step_set, 35, 0.001, DPI, turn_command)
                     step_set += 1
                     if step_set == 5:
                         step_set = 1
@@ -146,20 +148,20 @@ def move_thread():
         else:
             move.steady_X()
             move.steady()
-            #print('steady')
-            #time.sleep(0.2)
+            # print('steady')
+            # time.sleep(0.2)
 
 
 def info_send_client():
     SERVER_IP = addr[0]
-    SERVER_PORT = 2256   #Define port serial 
+    SERVER_PORT = 2256  # Define port serial 
     SERVER_ADDR = (SERVER_IP, SERVER_PORT)
-    Info_Socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM) #Set connection value for socket
+    Info_Socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  # Set connection value for socket
     Info_Socket.connect(SERVER_ADDR)
     print(SERVER_ADDR)
     while 1:
         try:
-            Info_Socket.send((get_cpu_tempfunc()+' '+get_cpu_use()+' '+get_ram_info()).encode())
+            Info_Socket.send((get_cpu_tempfunc() + ' ' + get_cpu_use() + ' ' + get_ram_info()).encode())
             time.sleep(1)
         except:
             pass
@@ -167,13 +169,13 @@ def info_send_client():
 
 def run():
     global direction_command, turn_command, SmoothMode, steadyMode
-    moving_threading=threading.Thread(target=move_thread)    #Define a thread for moving
-    moving_threading.setDaemon(True)                             #'True' means it is a front thread,it would close when the mainloop() closes
-    moving_threading.start()                                     #Thread starts
+    moving_threading = threading.Thread(target=move_thread)  # Define a thread for moving
+    moving_threading.setDaemon(True)  # 'True' means it is a front thread,it would close when the mainloop() closes
+    moving_threading.start()  # Thread starts
 
-    info_threading=threading.Thread(target=info_send_client)    #Define a thread for information sending
-    info_threading.setDaemon(True)                             #'True' means it is a front thread,it would close when the mainloop() closes
-    info_threading.start()                                     #Thread starts
+    info_threading = threading.Thread(target=info_send_client)  # Define a thread for information sending
+    info_threading.setDaemon(True)  # 'True' means it is a front thread,it would close when the mainloop() closes
+    info_threading.start()  # Thread starts
 
     ws_R = 0
     ws_G = 0
@@ -183,7 +185,7 @@ def run():
     Y_pitch_MAX = 600
     Y_pitch_MIN = 100
 
-    while True: 
+    while True:
         data = ''
         data = str(tcpCliSock.recv(BUFSIZ).decode())
         if not data:
@@ -201,7 +203,7 @@ def run():
             turn_command = 'right'
         elif 'leftside' == data:
             turn_command = 'left'
-        elif 'rightside'== data:
+        elif 'rightside' == data:
             turn_command = 'right'
         elif 'TS' in data:
             turn_command = 'no'
@@ -220,23 +222,23 @@ def run():
 
         elif 'wsR' in data:
             try:
-                set_R=data.split()
+                set_R = data.split()
                 ws_R = int(set_R[1])
-                LED.colorWipe(Color(ws_R,ws_G,ws_B))
+                LED.colorWipe(Color(ws_R, ws_G, ws_B))
             except:
                 pass
         elif 'wsG' in data:
             try:
-                set_G=data.split()
+                set_G = data.split()
                 ws_G = int(set_G[1])
-                LED.colorWipe(Color(ws_R,ws_G,ws_B))
+                LED.colorWipe(Color(ws_R, ws_G, ws_B))
             except:
                 pass
         elif 'wsB' in data:
             try:
-                set_B=data.split()
+                set_B = data.split()
                 ws_B = int(set_B[1])
-                LED.colorWipe(Color(ws_R,ws_G,ws_B))
+                LED.colorWipe(LED.Color(ws_R, ws_G, ws_B))
             except:
                 pass
 
@@ -261,34 +263,34 @@ def run():
 
 
         elif 'Switch_1_on' in data:
-            switch.switch(1,1)
+            switch.switch(1, 1)
             tcpCliSock.send(('Switch_1_on').encode())
 
         elif 'Switch_1_off' in data:
-            switch.switch(1,0)
+            switch.switch(1, 0)
             tcpCliSock.send(('Switch_1_off').encode())
 
         elif 'Switch_2_on' in data:
-            switch.switch(2,1)
+            switch.switch(2, 1)
             tcpCliSock.send(('Switch_2_on').encode())
 
         elif 'Switch_2_off' in data:
-            switch.switch(2,0)
+            switch.switch(2, 0)
             tcpCliSock.send(('Switch_2_off').encode())
 
         elif 'Switch_3_on' in data:
-            switch.switch(3,1)
+            switch.switch(3, 1)
             tcpCliSock.send(('Switch_3_on').encode())
 
         elif 'Switch_3_off' in data:
-            switch.switch(3,0)
+            switch.switch(3, 0)
             tcpCliSock.send(('Switch_3_off').encode())
 
         else:
             pass
 
 
-def destory():
+def destroy():
     move.clean_all()
 
 
@@ -298,47 +300,47 @@ if __name__ == '__main__':
     move.init_all()
 
     HOST = ''
-    PORT = 10223                              #Define port serial 
-    BUFSIZ = 1024                             #Define buffer size
+    PORT = 10223  # Define port serial 
+    BUFSIZ = 1024  # Define buffer size
     ADDR = (HOST, PORT)
 
     try:
-        led_threading=threading.Thread(target=breath_led)         #Define a thread for LED breathing
-        led_threading.setDaemon(True)                             #'True' means it is a front thread,it would close when the mainloop() closes
-        led_threading.start()                                     #Thread starts
+        led_threading = threading.Thread(target=breath_led)  # Define a thread for LED breathing
+        led_threading.setDaemon(True)  # 'True' means it is a front thread,it would close when the mainloop() closes
+        led_threading.start()  # Thread starts
         LED.breath_color_set('blue')
     except:
         pass
 
-    while  1:
+    while 1:
         try:
-            s =socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
-            s.connect(("1.1.1.1",80))
-            ipaddr_check=s.getsockname()[0]
+            s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            s.connect(("1.1.1.1", 80))
+            ipaddr_check = s.getsockname()[0]
             s.close()
             print(ipaddr_check)
         except:
-            ap_threading=threading.Thread(target=ap_thread)   #Define a thread for data receiving
-            ap_threading.setDaemon(True)                          #'True' means it is a front thread,it would close when the mainloop() closes
-            ap_threading.start()                                  #Thread starts
+            ap_threading = threading.Thread(target=ap_thread)  # Define a thread for data receiving
+            ap_threading.setDaemon(True)  # 'True' means it is a front thread,it would close when the mainloop() closes
+            ap_threading.start()  # Thread starts
 
-            LED.colorWipe(Color(0,16,50))
+            LED.colorWipe(Color(0, 16, 50))
             time.sleep(1)
-            LED.colorWipe(Color(0,16,100))
+            LED.colorWipe(Color(0, 16, 100))
             time.sleep(1)
-            LED.colorWipe(Color(0,16,150))
+            LED.colorWipe(Color(0, 16, 150))
             time.sleep(1)
-            LED.colorWipe(Color(0,16,200))
+            LED.colorWipe(Color(0, 16, 200))
             time.sleep(1)
-            LED.colorWipe(Color(0,16,255))
+            LED.colorWipe(Color(0, 16, 255))
             time.sleep(1)
-            LED.colorWipe(Color(35,255,35))
+            LED.colorWipe(Color(35, 255, 35))
 
         try:
             tcpSerSock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            tcpSerSock.setsockopt(socket.SOL_SOCKET,socket.SO_REUSEADDR,1)
+            tcpSerSock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             tcpSerSock.bind(ADDR)
-            tcpSerSock.listen(5)                      #Start server,waiting for client
+            tcpSerSock.listen(5)  # Start server,waiting for client
             print('waiting for connection...')
             tcpCliSock, addr = tcpSerSock.accept()
             print('...connected from :', addr)
@@ -348,16 +350,16 @@ if __name__ == '__main__':
 
     try:
         LED.breath_status_set(0)
-        LED.colorWipe(Color(64,128,255))
+        LED.colorWipe(Color(64, 128, 255))
     except:
         pass
 
     try:
         run()
     except:
-        LED.colorWipe(Color(0,0,0))
-        destory()
+        LED.colorWipe(Color(0, 0, 0))
+        destroy()
         move.clean_all()
-        switch.switch(1,0)
-        switch.switch(2,0)
-        switch.switch(3,0)
+        switch.switch(1, 0)
+        switch.switch(2, 0)
+        switch.switch(3, 0)
