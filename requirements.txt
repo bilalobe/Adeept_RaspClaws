@@ -1,0 +1,15 @@
+numpy>=1.19.0
+matplotlib>=3.3.0
+pytest>=6.2.0
+pytest-cov>=2.12.0
+dataclasses>=0.6; python_version < '3.7'
+typing-extensions>=3.7.4
+Flask>=2.0.0
+Flask-Cors>=3.0.10
+rpi_ws281x>=4.3.0; platform_machine == 'armv7l'
+RPi.GPIO>=0.7.0; platform_machine == 'armv7l'
+websockets>=9.1
+zmq>=0.0.0
+imutils>=0.5.4
+opencv-python>=4.5.0
+Adafruit-PCA9685>=1.0.1; platform_machine == 'armv7l'
